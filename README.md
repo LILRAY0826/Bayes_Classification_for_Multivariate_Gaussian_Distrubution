@@ -52,7 +52,7 @@ A ***feature vector*** is a random vector due to the randomness of the feature v
     
     * Create a enviroment for labelme
         ```
-        conda create -n=labelme python=3.7`
+        conda create -n=labelme python=3.7
         conda install pyqt
         conda activate labelme
         pip install labelme
