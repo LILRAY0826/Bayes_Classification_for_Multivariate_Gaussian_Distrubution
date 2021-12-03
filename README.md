@@ -16,13 +16,13 @@
 ![](https://i.imgur.com/jBqf2zE.png)
 ---
 * **p(x|ωi) :** It is the ***Posterior Probability*** introduced above.
-* ***x :*** It is the ***feature vector*** of ***xi***, where i = i~n, composed by a number of features x~1~,. . .,x~k~, i.e, **x** = [x~1~,x~2~,. . .,x~d~]^T^ ∈ ***Ｒ^d^***.
+* ***x :*** It is the ***feature vector*** of ***xi***, where i = i...n, composed by a number of features x1,. . .,xk, i.e, **x** = [x1,x2,. . .,xd]^T^ ∈ ***Ｒ^d^***.
 A ***feature vector*** is a random vector due to the randomness of the feature values.
-* ***µ~i~ :*** where ***µ~i~*** , which is the **mean vector** (or **mean** for ***Univariate Gaussian***) of the samples in class ***ω~i~***. 
+* ***µi :*** where ***µi*** , which is the **mean vector** (or **mean** for ***Univariate Gaussian***) of the samples in class ***ωi***. 
 
     ![](https://i.imgur.com/KY87UKa.png)
 
-* ***Σ :***  which is the **covariance matrix** (or ***variances*** for ***Univariate Gaussian***) of the samples in class ***ω~i~***.
+* ***Σ :***  which is the **covariance matrix** (or ***variances*** for ***Univariate Gaussian***) of the samples in class ***ωi***.
 
     ![](https://i.imgur.com/n2Nzisk.png)
     
