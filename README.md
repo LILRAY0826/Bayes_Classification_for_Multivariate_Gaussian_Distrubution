@@ -15,8 +15,8 @@
 ### Formula :
 ![](https://i.imgur.com/jBqf2zE.png)
 ---
-* **p(x|ω~i~) :** It is the ***Posterior Probability*** introduced above.
-* ***x :*** It is the ***feature vector*** of ***x~i~***, where i = i~n, composed by a number of features x~1~,. . .,x~k~, i.e, **x** = [x~1~,x~2~,. . .,x~d~]^T^ ∈ ***Ｒ^d^***.
+* **p(x|ωi) :** It is the ***Posterior Probability*** introduced above.
+* ***x :*** It is the ***feature vector*** of ***xi***, where i = i~n, composed by a number of features x~1~,. . .,x~k~, i.e, **x** = [x~1~,x~2~,. . .,x~d~]^T^ ∈ ***Ｒ^d^***.
 A ***feature vector*** is a random vector due to the randomness of the feature values.
 * ***µ~i~ :*** where ***µ~i~*** , which is the **mean vector** (or **mean** for ***Univariate Gaussian***) of the samples in class ***ω~i~***. 
 
