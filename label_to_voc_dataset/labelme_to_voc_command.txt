@@ -1,0 +1,6 @@
+python labelme2voc.py label_dataset voc_dataset --labels labels.txt
+
+Note:
+python labelme2voc.py <data> <data_output> --labels <label.txt path>
+<data> Path of label data(json and jpeg)、<data_output> Path of output data of conversion
+、<label.txt path> Path of label.txt that includes all of label attributes.
