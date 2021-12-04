@@ -1,6 +1,6 @@
 import numpy as np
 
-# from voc data find pixels of duck & non_duck
+# from voc data find pixels of all class labels
 def find_pixels(voc_img):
     # declare two lists to put in the pixels of labels
     duck_pixels = []
@@ -29,7 +29,7 @@ def find_pixels(voc_img):
                 sand_pixels.append(f)
     return duck_pixels, water_pixels, grass_pixels, road_pixels, sand_pixels
 
-# from pixels find the rgb values of duck & non_duck
+# from pixels find the rgb values of all class labels
 def find_rgb(org_img, duck_pixels, water_pixels, grass_pixels, road_pixels, sand_pixels):
     # declare two lists to put in the rgb values of labels
     duck_rgb = []
