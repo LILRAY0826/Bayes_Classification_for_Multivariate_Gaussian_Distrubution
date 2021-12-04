@@ -239,7 +239,7 @@ plt.show()
 ---
 ![](https://i.imgur.com/Zgoj9iI.png)
             
-#### In voc_img, the fields of blue are ducks, th fields of greem are non_duck. 
+#### In voc_img, the fields of blue are ducks, th fields of green are non_duck. 
 #### You can not only observe easily that all the ducks were roughly detected, but also aware that the road, sand or the others not duck's pixels are detected, so I improved my model for version 2.
             
 *VII . Model Construction Version 2 :*
