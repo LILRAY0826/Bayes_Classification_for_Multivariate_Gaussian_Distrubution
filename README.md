@@ -1,4 +1,4 @@
-***Pattern Recognition - Bayes Classification for Multivariate Gaussian Distrubution on Duck Recognized***
+***Pattern Recognition - Bayes Classification for Multivariate Gaussian Distribution on Duck Recognized***
 ===
 *I . Introduction*
 ---
