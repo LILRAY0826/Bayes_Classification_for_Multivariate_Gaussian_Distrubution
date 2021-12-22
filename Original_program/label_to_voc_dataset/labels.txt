@@ -1,0 +1,8 @@
+__ignore__
+_background_
+Duck
+Non_duck
+Water
+Grass
+Road
+Sand
