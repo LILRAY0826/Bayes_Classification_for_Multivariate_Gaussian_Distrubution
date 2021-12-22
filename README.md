@@ -89,168 +89,12 @@ A ***feature vector*** is a random vector due to the randomness of the feature v
         You will get a voc dataset, including the above file, and the file of **SegmentationClassPNG** include the PNG image that we will utilize later.
             
             
-*IV . Model Construction Version 1:*
+*IV . Model Construction :*
 ---
-* #### Abstract :          
-    ####    *In version 1, I define my class labels in two kinds, duck & non_duck, so let's go ahead and observed what's going on.*           
-* ####  Define a funtion to get pixels of duck & non duck :
-```python
-import numpy as np
-
-# from voc data find pixels of duck & non_duck
-def find_duck_and_non_duck_pixels(voc_img):
-    # declare two lists to put in the pixels of labels
-    duck_pixels = []
-    non_duck_pixels = []
-    # find duck and non_duck pixels, then append into the related list
-    for i in range(0, voc_img.shape[0]):
-        for j in range(0, voc_img.shape[1]):
-            print("Collecting and Scanning Pixels : {:d}/{:d}, {:d}/{:d}".format(i, voc_img.shape[0], j, voc_img.shape[1]))
-            if (voc_img[i][j] == [0, 0, 128]).all():  # is duck pixels
-                a = [i, j]
-                duck_pixels.append(a)
-            if (voc_img[i][j] == [0, 128, 0]).all():  # is non_duck pixels
-                b = [i, j]
-                non_duck_pixels.append(b)
-    return duck_pixels, non_duck_pixels
-```
-* #### Define a funtion to get rgb value (feature vector) of duck & non duck :
-```python
-# from pixels find the rgb values of duck & non_duck
-def find_duck_and_non_duck_rgb(org_img, duck_pixels, non_duck_pixels):
-    # declare two lists to put in the rgb values of labels
-    duck_rgb = []
-    non_duck_rgb = []
-    # find duck and non_duck rgb values, then append into the related list
-    for i in range(0, len(duck_pixels)):
-        print('Get duck RGB : {:d}/{:d}'.format(i, len(duck_pixels)))
-        x = duck_pixels[i][0]
-        y = duck_pixels[i][1]
-        duck_rgb.append(org_img[x][y])
-    for i in range(0, len(non_duck_pixels)):
-        print('Get non duck RGB : {:d}/{:d}'.format(i, len(non_duck_pixels)))
-        x = non_duck_pixels[i][0]
-        y = non_duck_pixels[i][1]
-        non_duck_rgb.append(org_img[x][y])
-
-    return duck_rgb, non_duck_rgb
-```
-* ####  Define a funtion to compute mean vector µ~i~ :
-```python
-# Mean of feature vector (RGB value)
-def mean(array):
-    mean_feature_vector = [0, 0, 0]
-    for i in range (0, len(array)):
-        mean_feature_vector += array[i]
-    mean_feature_vector[0] = mean_feature_vector[0] / len(array)
-    mean_feature_vector[1] = mean_feature_vector[1] / len(array)
-    mean_feature_vector[2] = mean_feature_vector[2] / len(array)
-    mean_feature_vector = np.array([mean_feature_vector])
-    return mean_feature_vector.T
-```
-* ####  Define a funtion to compute sigma Σ :
-```python
-# Sigma of feature vector
-def sigma(rgb_array, mean_array):
-    sigma_vector = [[0, 0, 0],
-                    [0, 0, 0],
-                    [0, 0, 0]]
-    for i in range (0, len(rgb_array)):
-        x_array = np.array([rgb_array[i]])
-        x_array = x_array.T
-        sigma_vector += (x_array - mean_array) * ((x_array - mean_array).T)
-    sigma_vector = sigma_vector/(len(rgb_array) - 1)
-    return sigma_vector  
-```    
-* ####  Define a funtion to compute Likelihood P(ω|x) :
-```python
-# Predict Likelihood
-def likelihood (feature_vector, mean_vector, sigma_vector):
-    constant = 1 / ((2*np.pi)**(3/2)*(np.linalg.det(sigma_vector))**(1/2))
-    np_linalg_inv = np.linalg.inv(sigma_vector)
-    feature_vector_minus_mean_vector = feature_vector - mean_vector
-    exponential = np.exp((-0.5) * np.dot(np.dot((feature_vector_minus_mean_vector.T), np_linalg_inv), feature_vector_minus_mean_vector))
-    return constant*exponential
-```
-*V . Run Programming Version 1 :*
----
-```python
-import cv2
-import numpy as np
-import version_1_model
-import matplotlib.pyplot as plt
-
-# Load voc and original image
-voc_img = cv2.imread("label_to_voc_dataset/voc_dataset/SegmentationClassPNG/full_duck.png")
-org_img = cv2.imread("label_to_voc_dataset/label_dataset/full_duck.jpeg")
-predict_img = cv2.imread("label_to_voc_dataset/label_dataset/full_duck.jpeg")
-
-'''''''''
-# Image cutting for testing, if the dataset is so large that need to spend lots of time
-voc_img = voc_img[2000:2500, 2000:2500]
-org_img = org_img[2000:2500, 2000:2500]
-predict_img = predict_img[2000:2500, 2000:2500]
-'''''''''
-
-duck_pixels, non_duck_pixels = version_1_model.find_duck_and_non_duck_pixels(voc_img)
-duck_rgb, non_duck_rgb = version_1_model.find_duck_and_non_duck_rgb(org_img, duck_pixels, non_duck_pixels)
-
-print("Training, please wait a second.")
-# Get the feature vector of duck and non_duck
-mean_duck_rgb = version_1_model.mean(duck_rgb)
-mean_non_duck_rgb = version_1_model.mean(non_duck_rgb)
-
-# Get the sigma vector of duck and non_duck
-sigma_duck_rgb = version_1_model.sigma(duck_rgb, mean_duck_rgb)
-sigma_non_duck_rgb = version_1_model.sigma(non_duck_rgb, mean_non_duck_rgb)
-
-# Predict Likelihood
-for i in range (0, org_img.shape[0]):
-    for j in range (0, org_img.shape[1]):
-        x_array = np.array([org_img[i][j]])
-        x_array = x_array.T
-        print('Predicting : {:d}/{:d}, {:d}/{:d}'.format(i, org_img.shape[0], j, org_img.shape[1]))
-        possibility_of_duck = version_1_model.likelihood(x_array, mean_duck_rgb, sigma_duck_rgb)
-        possibility_of_non_duck = version_1_model.likelihood(x_array, mean_non_duck_rgb, sigma_non_duck_rgb)
-        if possibility_of_duck[0] >= possibility_of_non_duck[0]:
-            predict_img[i][j] = [255, 255, 255]
-        else :
-            predict_img[i][j] = [0, 0, 0]
-
-# Show the predict result and compare with the original image then save them
-plt.subplot(1, 3, 1)
-plt.title("org_img")
-plt.imshow(org_img)
-cv2.imwrite("predict_result/org_img.png", org_img)
-
-plt.subplot(1, 3, 2)
-plt.title("voc_img")
-plt.imshow(voc_img)
-cv2.imwrite("predict_result/voc_img.png", voc_img)
-
-plt.subplot(1, 3, 3)
-plt.title("predict_img")
-plt.imshow(predict_img)
-cv2.imwrite("predict_result/predict_img.png", predict_img)
-plt.show()
-```
-
-*VI . Conclusion Version 1 :*
----
-![](https://i.imgur.com/RQBYBoR.jpg)
-            
-#### In voc_img, the fields of blue are ducks, th fields of green are non_duck. 
-#### You can not only observe easily that all the ducks were roughly detected, but also aware that the road, sand or the others not duck's pixels are detected, so I improved my model for version 2.
-            
-*VII . Model Construction Version 2 :*
----
-* #### Abstract :         
-    ####    *In version 2, I define my class labels in five kinds, duck, water, grass, road, sand, so again,  let's go ahead and observed what's going on.*           
+* #### Abstract :           
+    ####    *I define my class labels in five kinds, duck, water, grass, road, sand, let's go ahead and observed what's going on.*           
 * ####  Define a funtion to get pixels of all class labels:
 ```python
-import numpy as np
-
-# from voc data find pixels of all class labels
 def find_pixels(voc_img):
     # declare two lists to put in the pixels of labels
     duck_pixels = []
@@ -277,7 +121,8 @@ def find_pixels(voc_img):
             elif (voc_img[i][j] == [128, 128, 0]).all():  # is sand pixels
                 f = [i, j]
                 sand_pixels.append(f)
-    return duck_pixels, water_pixels, grass_pixels, road_pixels, sand_pixels
+    total_labels = len(duck_pixels)+len(water_pixels)+len(grass_pixels)+len(road_pixels)+len(sand_pixels)
+    return duck_pixels, water_pixels, grass_pixels, road_pixels, sand_pixels, total_labels
 ```
 * ####  Define a funtion to get rgb value (feature vector) of all class labels :
 ```python
@@ -368,8 +213,23 @@ def likelihood (feature_vector, mean_vector, sigma_vector):
         exponential = 0
     return constant*exponential
 ```
-*VIII . Run Programming Version 2:*
+ * ####  Define a funtion to compute prior possibility : 
+```python
+def prior (total_labels, individual_labels):
+    if total_labels == 0 :
+        return 0
+    return float(individual_labels/total_labels)
+```
+* ####  ==Define a funtion to compute accuracy(distance of new prior and old one) :==  
+```python
+def accuracy (new_prior, prior):
+    if prior == 0:
+        return 0
+    return 1 - (abs(new_prior-prior)/prior)
+```
+*V . Run Programming :*
 ---
+* ####  In this case, I set up the epochs for 20 times :  
 ```python
 import cv2
 import numpy as np
@@ -383,15 +243,15 @@ predict_img = cv2.imread("label_to_voc_dataset/label_dataset/full_duck.jpeg")
 
 '''''''''
 # Image cutting for testing, if the dataset is so large that need to spend lots of time
-voc_img = voc_img[2000:2500, 2000:2500]
-org_img = org_img[2000:2500, 2000:2500]
-predict_img = predict_img[2000:2500, 2000:2500]
+voc_img = voc_img[2500:3000, 2000:2500]
+org_img = org_img[2500:3000, 2000:2500]
+predict_img = predict_img[2500:3000, 2000:2500]
 '''''''''
 
-duck_pixels, water_pixels, grass_pixels, road_pixels, sand_pixels = version_2_model.find_pixels(voc_img)
+# Get all label pixels
+duck_pixels, water_pixels, grass_pixels, road_pixels, sand_pixels, total_pixels = version_2_model.find_pixels(voc_img)
 duck_rgb, water_rgb, grass_rgb, road_rgb, sand_rgb = version_2_model.find_rgb(org_img, duck_pixels, water_pixels, grass_pixels, road_pixels, sand_pixels)
 
-print("Training, please wait a second.")
 # Get the feature vector of duck and non_duck
 mean_duck_rgb = version_2_model.mean(duck_rgb)
 mean_water_rgb = version_2_model.mean(water_rgb)
@@ -406,28 +266,94 @@ sigma_grass_rgb = version_2_model.sigma(grass_rgb, mean_grass_rgb)
 sigma_road_rgb = version_2_model.sigma(road_rgb, mean_road_rgb)
 sigma_sand_rgb = version_2_model.sigma(sand_rgb, mean_sand_rgb)
 
-# Predict Likelihood
+likelihood_of_duck = np.zeros((org_img.shape[0], org_img.shape[1]), dtype=np.float64)
+likelihood_of_water = np.zeros((org_img.shape[0], org_img.shape[1]), dtype=np.float64)
+likelihood_of_grass = np.zeros((org_img.shape[0], org_img.shape[1]), dtype=np.float64)
+likelihood_of_road = np.zeros((org_img.shape[0], org_img.shape[1]), dtype=np.float64)
+likelihood_of_sand = np.zeros((org_img.shape[0], org_img.shape[1]), dtype=np.float64)
+
+# Calculate Likelihood
 for i in range (0, org_img.shape[0]):
     for j in range (0, org_img.shape[1]):
         x_array = np.array([org_img[i][j]])
         x_array = x_array.T
-        print('Predicting : {:d}/{:d}, {:d}/{:d}'.format(i, org_img.shape[0], j, org_img.shape[1]))
-        possibility_of_duck = version_2_model.likelihood(x_array, mean_duck_rgb, sigma_duck_rgb)
-        possibility_of_water = version_2_model.likelihood(x_array, mean_water_rgb, sigma_water_rgb)
-        possibility_of_grass = version_2_model.likelihood(x_array, mean_grass_rgb, sigma_grass_rgb)
-        possibility_of_road = version_2_model.likelihood(x_array, mean_road_rgb, sigma_road_rgb)
-        possibility_of_sand = version_2_model.likelihood(x_array, mean_sand_rgb, sigma_sand_rgb)
-        if max([possibility_of_duck, possibility_of_water, possibility_of_grass, possibility_of_road, possibility_of_sand]) == possibility_of_duck :
+        print('Calculating Likelihood : {:d}/{:d}, {:d}/{:d}'.format(i+1, org_img.shape[0], j+1, org_img.shape[1]))
+        likelihood_of_duck[i][j] = version_2_model.likelihood(x_array, mean_duck_rgb, sigma_duck_rgb)
+        likelihood_of_water[i][j] = version_2_model.likelihood(x_array, mean_water_rgb, sigma_water_rgb)
+        likelihood_of_grass[i][j] = version_2_model.likelihood(x_array, mean_grass_rgb, sigma_grass_rgb)
+        likelihood_of_road[i][j] = version_2_model.likelihood(x_array, mean_road_rgb, sigma_road_rgb)
+        likelihood_of_sand[i][j] = version_2_model.likelihood(x_array, mean_sand_rgb, sigma_sand_rgb)
+
+epochs = 20
+posterior_of_duck = np.zeros((org_img.shape[0], org_img.shape[1]), dtype=np.float64)
+posterior_of_water = np.zeros((org_img.shape[0], org_img.shape[1]), dtype=np.float64)
+posterior_of_grass = np.zeros((org_img.shape[0], org_img.shape[1]), dtype=np.float64)
+posterior_of_road = np.zeros((org_img.shape[0], org_img.shape[1]), dtype=np.float64)
+posterior_of_sand = np.zeros((org_img.shape[0], org_img.shape[1]), dtype=np.float64)
+duck_counter = 0
+water_counter = 0
+grass_counter = 0
+road_counter = 0
+sand_counter = 0
+duck_accuracy = 0
+
+# Training
+for epoch in range(0, epochs):
+    if epoch == 0:
+        # Get the initial prior of duck and non_duck
+        prior_of_duck = version_2_model.prior(total_pixels, len(duck_pixels))
+        prior_of_water = version_2_model.prior(total_pixels, len(water_pixels))
+        prior_of_grass = version_2_model.prior(total_pixels, len(grass_pixels))
+        prior_of_road = version_2_model.prior(total_pixels, len(road_pixels))
+        prior_of_sand = version_2_model.prior(total_pixels, len(sand_pixels))
+
+    else:
+        prior_of_duck_new = float(duck_counter / (org_img.shape[0] * org_img.shape[1]))
+        prior_of_water_new = float(water_counter / (org_img.shape[0] * org_img.shape[1]))
+        prior_of_grass_new = float(grass_counter / (org_img.shape[0] * org_img.shape[1]))
+        prior_of_road_new = float(road_counter / (org_img.shape[0] * org_img.shape[1]))
+        prior_of_sand_new = float(sand_counter / (org_img.shape[0] * org_img.shape[1]))
+        duck_accuracy = version_2_model.accuracy(prior_of_duck_new, prior_of_duck)
+        prior_of_duck = prior_of_duck_new
+        prior_of_water = prior_of_water_new
+        prior_of_grass = prior_of_grass_new
+        prior_of_road = prior_of_road_new
+        prior_of_sand = prior_of_sand_new
+
+    for i in range(0, org_img.shape[0]):
+        for j in range(0, org_img.shape[1]):
+            print("Training epoch : {:d}/{:d} ----> {:d}/{:d}, {:d}/{:d} ----> Accuracy : {:.3f}%".format(epoch+1, epochs, i+1, org_img.shape[0], j+1, org_img.shape[1], duck_accuracy*100))
+            posterior_of_duck[i][j] = likelihood_of_duck[i][j] * prior_of_duck
+            posterior_of_water[i][j] = likelihood_of_water[i][j] * prior_of_water
+            posterior_of_grass[i][j] = likelihood_of_grass[i][j] * prior_of_grass
+            posterior_of_road[i][j] = likelihood_of_road[i][j] * prior_of_road
+            posterior_of_sand[i][j] = likelihood_of_sand[i][j] * prior_of_sand
+
+            if max(posterior_of_duck[i][j], posterior_of_water[i][j], posterior_of_grass[i][j], posterior_of_road[i][j], posterior_of_sand[i][j]) == posterior_of_duck[i][j]:
+                duck_counter += 1
+            elif max(posterior_of_duck[i][j], posterior_of_water[i][j], posterior_of_grass[i][j], posterior_of_road[i][j], posterior_of_sand[i][j]) == posterior_of_water[i][j]:
+                water_counter += 1
+            elif max(posterior_of_duck[i][j], posterior_of_water[i][j], posterior_of_grass[i][j], posterior_of_road[i][j], posterior_of_sand[i][j]) == posterior_of_grass[i][j]:
+                grass_counter += 1
+            elif max(posterior_of_duck[i][j], posterior_of_water[i][j], posterior_of_grass[i][j], posterior_of_road[i][j], posterior_of_sand[i][j]) == posterior_of_road[i][j]:
+                road_counter += 1
+            elif max(posterior_of_duck[i][j], posterior_of_water[i][j], posterior_of_grass[i][j], posterior_of_road[i][j], posterior_of_sand[i][j]) == posterior_of_sand[i][j]:
+                sand_counter += 1
+
+# Plot the image
+for i in range (0, org_img.shape[0]):
+    for j in range (0, org_img.shape[1]):
+        print('Prepare for showing images : {:d}/{:d}, {:d}/{:d}'.format(i+1, org_img.shape[0], j+1, org_img.shape[1]))
+        if max([posterior_of_duck[i][j], posterior_of_water[i][j], posterior_of_grass[i][j], posterior_of_road[i][j], posterior_of_sand[i][j]]) == posterior_of_duck[i][j] :
             predict_img[i][j] = [255, 255, 255]
         else:
             predict_img[i][j] = [0, 0, 0]
-        
 
 # Show the predict result and compare with the original image then save them
 plt.subplot(1, 3, 1)
 plt.title("org_img")
 plt.imshow(org_img)
-cv2.imwrite("predict_result/org_img.png", org_img)
+cv2.imwrite("predict_result/org_img.jpg", org_img)
 
 plt.subplot(1, 3, 2)
 plt.title("voc_img")
@@ -440,9 +366,9 @@ plt.imshow(predict_img)
 cv2.imwrite("predict_result/predict_img.png", predict_img)
 plt.show()
 ```
-*IX . Conclusion Version 2:*
+*VI . Conclusion :*
 ---
-![](https://i.imgur.com/daI2Nf3.jpg)
+![](https://i.imgur.com/0YJYCIk.jpg)
 #### In predict_img, it clearly indicates the white pixels are duck and the wrong pixels that is not duck's pixel but is annotated as white pixel are decreased.
 #### However, there are also lots of pixels is incorret, this model can be more sophiscated and delicated.
 *X . Summary :*
