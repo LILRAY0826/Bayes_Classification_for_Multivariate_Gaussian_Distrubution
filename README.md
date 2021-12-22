@@ -220,7 +220,7 @@ def prior (total_labels, individual_labels):
         return 0
     return float(individual_labels/total_labels)
 ```
-* ####  ==Define a funtion to compute accuracy(distance of new prior and old one) :==  
+* ####  Define a funtion to compute accuracy(distance of new prior and old one) : 
 ```python
 def accuracy (new_prior, prior):
     if prior == 0:
